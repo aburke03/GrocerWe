@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "567866060220",
+    "firebase_url": "https://grocerwe-ba4d7-default-rtdb.firebaseio.com",
+    "project_id": "grocerwe-ba4d7",
+    "storage_bucket": "grocerwe-ba4d7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:567866060220:android:6014529032674cf4108fb9",
+        "android_client_info": {
+          "package_name": "com.example.grocerwe"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-KJ7N0s0xhvO09mFoBI1JETDRvhEDgwI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
