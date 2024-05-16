@@ -6,64 +6,73 @@ import 'package:grocerwe/components/my_button.dart';
 import 'package:grocerwe/components/my_textfield.dart';
 
 
-class LoginPage extends StatefulWidget {
+class RegisterPage extends StatefulWidget {
   final Function()? onTap; 
-  const LoginPage({super.key, required this.onTap});
+  const RegisterPage({super.key, required this.onTap});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterPage> createState() => RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class RegisterPageState extends State<RegisterPage> {
   //text editing controllers
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+    final confirmPasswordController = TextEditingController();
 
-  //sign user in method
-  void signUserIn() async{
 
-    //show loading circle
-    showDialog(
-      context: context, 
-      builder: (context){
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
-      },
-    );
+//sign user up method
+void signUserUp() async {
+  //show loading circle
+  showDialog(
+    context: context, 
+    builder: (context) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    },
+  );
 
-    //try sign in
-    try{
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+  //try creating the user
+  try {
+    if (passwordController.text == confirmPasswordController.text) {
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: emailController.text,
         password: passwordController.text
       );
       //pop loading icon
       Navigator.pop(context);
-    } on FirebaseAuthException catch (e){
+    } else {
       //pop loading icon
       Navigator.pop(context);
-      // show error message
-      showErrorMessage(e.code);
+      showErrorMessage('Passwords do not match');
     }
+  } on FirebaseAuthException catch (e) {
+    //pop loading icon
+    Navigator.pop(context);
+    // show error message
+    showErrorMessage(e.code);
   }
+}
 
-  void showErrorMessage(String message){
-    showDialog(
-      context: context, 
-      builder: (context){
-        return AlertDialog(
-          backgroundColor: Colors.green,
-          title: Center(
+
+void showErrorMessage(String message) {
+  showDialog(
+    context: context, 
+    builder: (context) {
+      return AlertDialog(
+        backgroundColor: Colors.green,
+        title: Center(
           child: Text(
             message,
             style: const TextStyle(color: Colors.white),
-            ),
-        )
-        );
-      },
-    );
-  }
+          ),
+        ),
+      );
+    },
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -75,18 +84,18 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children:[
-              const SizedBox(height: 50), 
+              const SizedBox(height: 25), 
               //logo
               const Icon(
                 Icons.shopping_cart,
                 size: 100,
                 ),
 
-              const SizedBox(height: 50), 
+              const SizedBox(height: 25), 
 
-              //Welcome Text Screen 'GrocerWe'
+              //Welcome Text
               const Text(
-                'GrocerWe',
+                'Register Now',
                 style: TextStyle(
                   color: Colors.green,
                   fontSize: 30,
@@ -115,15 +124,20 @@ class _LoginPageState extends State<LoginPage> {
               ),
 
               const SizedBox(height: 10),
-              //Forgot Password
-              const Text('Forgot Passsword?'),
+
+              //Confirm password textfield
+              MyTextField(
+                controller: confirmPasswordController,
+                hintText: 'Confirm Password',
+                obscureText: true,
+              ),
 
               const SizedBox(height: 25),
 
               //Sign In Button
               MyButton(
-                text: "Sign In",
-                onTap: signUserIn,
+                text: "Sign Up",
+                onTap: signUserUp,
               ),
               const SizedBox(height: 50),
 
@@ -159,14 +173,14 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    'Not a member?',
+                    'Already have an account?',
                     style: TextStyle(color: Colors.black),
                   ),
                   const SizedBox(width: 4),
                   GestureDetector(
                     onTap: widget.onTap,
                   child: const Text(
-                    'Register Now',
+                    'Login now',
                     style: TextStyle(
                       color: Colors.blue,
                       fontWeight: FontWeight.bold,
