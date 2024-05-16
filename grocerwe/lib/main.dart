@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'pages/loginpage.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'package:grocerwe/pages/authpage.dart';
 
 
 void main() async {
@@ -28,7 +29,7 @@ class MyApp extends StatelessWidget {
       title: 'GrocerWe',
       locale: DevicePreview.locale(context),
       builder: DevicePreview.appBuilder,
-      home: LoginPage()
+      home: AuthPage()
     );
   }
 }
