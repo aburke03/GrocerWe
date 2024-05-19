@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({super.key});
@@ -10,10 +11,26 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final user = FirebaseAuth.instance.currentUser!;
-
   final TextEditingController _textController = TextEditingController();
+  final CollectionReference _groceryCollection = FirebaseFirestore.instance.collection('groceryList');
 
-  final List<String> _groceryList = [];
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
+  void _addItem() {
+    final String item = _textController.text;
+    if (item.isNotEmpty) {
+      _groceryCollection.add({'item': item, 'user': user.email});
+      _textController.clear();
+    }
+  }
+
+  void _removeItem(String id) {
+    _groceryCollection.doc(id).delete();
+  }
 
   // sign user out method
   void signUserOut() {
@@ -29,77 +46,18 @@ class _HomePageState extends State<HomePage> {
           IconButton(onPressed: signUserOut, icon: const Icon(Icons.logout)),
         ],
       ),
-      drawer: _buildDrawer(),
       body: _buildBody(),
       bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 
-  void dispose() {
-    _textController.dispose();
-    super.dispose();
-  }
-
-  void _addItem() {
-    final String item = _textController.text;
-    if (item.isNotEmpty) {
-      setState(() {
-        _groceryList.add(item);
-      });
-      _textController.clear();
-    }
-  }
-
-  void _removeItem(int index) {
-    setState(() {
-      _groceryList.removeAt(index);
-    });
-  }
-
-  Widget _buildDrawer() {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(
-              color: Colors.blue,
-            ),
-            child: Text(
-              'Menu',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-              ),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.home),
-            title: const Text('Home'),
-            onTap: () {
-              // Handle Home tap
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
-            onTap: () {
-              // Handle Settings tap
-            },
-          ),
-          // Add more ListTiles as needed
-        ],
-      ),
-    );
-  }
-
- Widget _buildBody() {
+  Widget _buildBody() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            "LOGGED IN! user@example.com", // Replace with actual user email
+            "Logged in as ${user.email!}",
             style: const TextStyle(fontSize: 20),
           ),
           const SizedBox(height: 20),
@@ -132,15 +90,26 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildGroceryList() {
-    return ListView.builder(
-      itemCount: _groceryList.length,
-      itemBuilder: (context, index) {
-        return ListTile(
-          title: Text(_groceryList[index]),
-          trailing: IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () => _removeItem(index),
-          ),
+    return StreamBuilder(
+      stream: _groceryCollection.snapshots(),
+      builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final documents = snapshot.data!.docs;
+        return ListView.builder(
+          itemCount: documents.length,
+          itemBuilder: (context, index) {
+            final doc = documents[index];
+            return ListTile(
+              title: Text(doc['item']),
+              trailing: IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: () => _removeItem(doc.id),
+              ),
+            );
+          },
         );
       },
     );
@@ -172,7 +141,6 @@ class _HomePageState extends State<HomePage> {
       ],
       onTap: (index) {
         // Handle bottom navigation tap
-        // For now, this is a placeholder
       },
     );
   }
